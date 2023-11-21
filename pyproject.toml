@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "ai-powered-search"
+version = "0.1.0"
+description = "AI powered product search demo"
+authors = ["Yuki Morishita <yuki@datastax.com>"]
+license = "APL2"
+readme = "README.md"
+packages = [{include = "api"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+langchain = "^0.0.336"
+openai = "^1.3.0"
+langserve = {extras = ["server"], version = "^0.0.27"}
+cassio = "^0.1.3"
+cassandra-driver = "^3.28.0"
+python-dotenv = "^1.0.0"
+tiktoken = "^0.5.1"
+
+#uvicorn = {extras = ["standard"], version = "^0.24.0.post1"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
