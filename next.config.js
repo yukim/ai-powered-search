@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "export",
   rewrites: async () => {
     return [
       {
@@ -25,6 +24,14 @@ const nextConfig = {
             : "/api/openapi.json",
       },
     ];
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "pim.thaiwatsadu.com",
+      },
+    ],
   },
 };
 

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export type ProductInfo = {
@@ -16,12 +17,12 @@ export default function Product(product: ProductInfo) {
     return (
         <div className="flex border-b">
             <div className="flex-none w-48 relative">
-                <img src={product.imageUrl}
+                <Image src={product.imageUrl}
                     alt={product.name}
                     width="0"
                     height="0"
                     sizes="100vw"
-                    className="inset-0 w-full h-full object-cover"></img>
+                    className="inset-0 w-full h-full object-cover"></Image>
             </div>
             <div className="flex-auto p-6">
                 <h1 className="text-lg font-semibold text-slate-900"><Link href={`https://www.thaiwatsadu.com/th/product/${product.id}`}>{product.name}</Link></h1>
