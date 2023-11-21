@@ -57,9 +57,9 @@ def build_search_chain(vector_store: VectorStore) -> Runnable:
         ("system", "You are a helpful customer service of a home improvement store and you are asked to pick products for a customer."
          "Translate the query to English if it is not in English.\n"
          "Extract the product category, brand name, and product specs such as size, color, etc from the following query.\n"),
-        ("human", "{query}"),
+        ("human", "{query} {brand}"),
     ])
-    llm = ChatOpenAI(model="gpt-4-1106-preview", temperature=0)
+    llm = ChatOpenAI(model="gpt-4-1106-preview", temperature=0, max_retries=0)
 
     def search_products(query: ProductSearchQuery):
         """
