@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 from langserve import add_routes
 
 import dotenv
@@ -23,5 +22,3 @@ add_routes(
     chain,
     path="/api/search"
 )
-
-app.mount("/", StaticFiles(directory="out/"), name="nextjs")
