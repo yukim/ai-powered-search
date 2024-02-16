@@ -11,6 +11,7 @@ export type ProductInfo = {
     description_en: string;
     price: number;
     priceUnit: string;
+    score: number;
 }
 
 export default function Product(product: ProductInfo) {
@@ -25,10 +26,11 @@ export default function Product(product: ProductInfo) {
                     className="inset-0 w-full h-full object-cover"></Image>
             </div>
             <div className="flex-auto p-6">
-                <h1 className="text-lg font-semibold text-slate-900"><Link href={`https://www.thaiwatsadu.com/th/product/${product.id}`}>{product.name}</Link></h1>
+                <h1 className="text-lg font-semibold text-slate-900">{product.name}</h1>
                 <div className="text-sm">Brand: {product.brand} / {product.price} {product.priceUnit}</div>
-                <div className="w-full text-sm font-medium text-slate-700 mt-2">{product.description}</div>
+                <div className="w-full text-sm font-medium text-slate-700 mt-2" dangerouslySetInnerHTML={{__html: product.description}}></div>
                 <div className="text-sm">Category: {product.category}</div>
+                {product.score && <div className="text-sm">Similarity score: {product.score}</div>}
             </div>
         </div>
     );

@@ -31,6 +31,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "pim.thaiwatsadu.com",
       },
+      {
+        protocol: "https",
+        hostname: "pim.powerbuy.co.th",
+      },
     ],
   },
 };

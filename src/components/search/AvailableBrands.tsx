@@ -4,7 +4,7 @@ export default function AvailableBrands({ brands, onClick }: { brands: string[],
             Explore brands in the category:
             {brands && brands.map((brand, idx) => (
                 <span key={idx}
-                    className="text-xs rounded-xl mr-2 p-2 bg-slate-100 shadow"
+                    className="text-xs rounded-xl mr-2 p-2 bg-slate-100 shadow cursor-pointer"
                     onClick={() => onClick(brand)}>{brand}</span>
             ))}
         </div>

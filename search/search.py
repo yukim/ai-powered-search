@@ -2,7 +2,7 @@ from langchain.chains.openai_functions import create_structured_output_runnable
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import Document
-from langchain.schema.runnable import Runnable, RunnableLambda
+from langchain.schema.runnable import Runnable, RunnablePassthrough, RunnableLambda
 from langchain.vectorstores import VectorStore
 from pydantic.v1 import BaseModel, Field
 from typing import List, Dict, Optional
@@ -21,6 +21,11 @@ with open('./data/categories.json', 'r') as f:
 brands_by_category: Dict[str, str] = {}
 with open('./data/brands_by_category.json', 'r') as f:
     brands_by_category = json.load(f)
+
+brands = set()
+for v in brands_by_category.values():
+    for b in v:
+        brands.add(b)
 
 
 def available_categories() -> List[str]:
@@ -54,12 +59,12 @@ def build_search_chain(vector_store: VectorStore) -> Runnable:
     * Prompt to extract product features from the user query
     """
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are a helpful customer service of a home improvement store and you are asked to pick products for a customer."
+        ("system", "You are a helpful customer service of an electronics store and you are asked to pick products for a customer."
          "Translate the query to English if it is not in English.\n"
          "Extract the product category, brand name, and product specs such as size, color, etc from the following query.\n"),
         ("human", "{query} {brand}"),
     ])
-    llm = ChatOpenAI(model="gpt-4-1106-preview", temperature=0, max_retries=0)
+    llm = ChatOpenAI(model="gpt-4-turbo-preview", temperature=0, max_retries=0)
 
     def search_products(query: ProductSearchQuery):
         """
@@ -72,13 +77,13 @@ def build_search_chain(vector_store: VectorStore) -> Runnable:
         """
         q = str(dict(query))
         filter = {}
-        if query.brand:
+        if query.brand and query.brand in brands:
             filter["brand"] = query.brand
-        if query.product_category and query.product_category in categories:
-            # categories are in Thai
-            filter["product_categories"] = categories[query.product_category]
+        # if query.product_category and query.product_category in categories:
+        #     # categories are in Thai
+        #     filter["product_categories"] = categories[query.product_category]
         documents = vector_store.similarity_search_with_relevance_scores(
-            q, k=10, score_threshold=0.8, filter=filter)
+            q, k=10, score_threshold=0.5, filter=filter)
 
         def to_product(document: Document, score: float):
             ret = {}

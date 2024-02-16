@@ -30,29 +30,34 @@ export default function ProductSearch() {
             const chain = new RemoteRunnable<{ query: string, brand?: string }, SearchResult, BaseCallbackConfig>({
                 url: "/api/search",
             });
-            const stream = await chain.stream({ query, brand });
-            for await (const chunk of stream) {
-                if (chunk.query) {
-                    setQuery(chunk.query);
-                } else if (chunk.available_brands) {
-                    setAvailableBrands(chunk.available_brands);
-                } else if (chunk.products) {
-                    const products = chunk.products.map((item: any) => {
-                        const images = item.image_link ? JSON.parse(item.image_link.replaceAll("'", "\"")) : [];
-                        return {
-                            id: item.product_id,
-                            name: item.product_name,
-                            category: item.product_categories,
-                            brand: item.brand,
-                            imageUrl: images.length > 0 ? images[0] : "",
-                            description: item.long_description,
-                            description_en: item.long_description_en,
-                            price: item.sale_price,
-                            priceUnit: "THB"
-                        }
-                    });
-                    setProducts(products);
+            try {
+                const stream = await chain.stream({ query, brand });
+                for await (const chunk of stream) {
+                    if (chunk.query) {
+                        setQuery(chunk.query);
+                    } else if (chunk.available_brands) {
+                        setAvailableBrands(chunk.available_brands);
+                    } else if (chunk.products) {
+                        const products = chunk.products.map((item: any) => {
+                            const images = item.image_link ? JSON.parse(item.image_link.replaceAll("'", "\"")) : [];
+                            return {
+                                id: item.product_id,
+                                name: item.product_name_en,
+                                category: item.product_categories,
+                                brand: item.brand,
+                                imageUrl: images.length > 0 ? images[0] : "",
+                                description: item.short_description,
+                                description_en: item.short_description_en,
+                                price: item.sale_price,
+                                score: item.score,
+                                priceUnit: "THB"
+                            }
+                        });
+                        setProducts(products);
+                    }
                 }
+            } catch (e) {
+                console.log(e);
             }
         }
     }
@@ -87,9 +92,9 @@ export default function ProductSearch() {
                 {availableBrands.length > 0 && <AvailableBrands brands={availableBrands} onClick={onClickBrand} />}
             </section>
             <section>
+                {query && products.length == 0 && <div>No products found.</div>}
                 {products.map((product) => (<Product key={product.id} {...product} />))}
             </section>
-
         </div>
     )
 }
