@@ -7,18 +7,13 @@ from langchain.vectorstores import VectorStore
 from pydantic.v1 import BaseModel, Field
 from typing import List, Dict, Optional
 
-import langchain
 import json
 
-langchain.debug = True
-
-categories = {}
+categories: list[str] = []
 with open('./data/categories.json', 'r') as f:
-    data = json.load(f)
-    for (thai, eng) in data:
-        categories[eng] = thai
+    categories = json.load(f)
 
-brands_by_category: Dict[str, str] = {}
+brands_by_category: dict[str, str] = {}
 with open('./data/brands_by_category.json', 'r') as f:
     brands_by_category = json.load(f)
 
@@ -29,20 +24,20 @@ for v in brands_by_category.values():
 
 
 def available_categories() -> List[str]:
-    return categories.keys()
+    return categories
 
 
 def get_brands(category: str) -> List[str]:
-    thai = categories.get(category, None)
-    return brands_by_category.get(thai, [])
+    return brands_by_category.get(category, [])
 
 
 class ProductSearchQuery(BaseModel):
     """Query model to search products, 
     """
     original_query: str = Field(..., description="Query that the user typed")
+    english_query: str = Field(..., description="Query translated into English")
     product_category: str = Field(
-        ..., description=f"Product category. Available categories: {available_categories()}")
+        ..., description=f"Product category. Only use available categories: {available_categories()}")
     brand: Optional[str] = Field("", description="Product's brand name")
     specs: Dict[str, str] = Field(
         {}, description=f"Product's specifications.")
@@ -62,7 +57,7 @@ def build_search_chain(vector_store: VectorStore) -> Runnable:
         ("system", "You are a helpful customer service of an electronics store and you are asked to pick products for a customer."
          "Translate the query to English if it is not in English.\n"
          "Extract the product category, brand name, and product specs such as size, color, etc from the following query.\n"),
-        ("human", "{query} {brand}"),
+        ("human", "Query: {query} Brand: {brand}"),
     ])
     llm = ChatOpenAI(model="gpt-4-turbo-preview", temperature=0, max_retries=0)
 
@@ -75,15 +70,13 @@ def build_search_chain(vector_store: VectorStore) -> Runnable:
         Args:
             query: Product description
         """
-        q = str(dict(query))
         filter = {}
         if query.brand and query.brand in brands:
             filter["brand"] = query.brand
         # if query.product_category and query.product_category in categories:
-        #     # categories are in Thai
-        #     filter["product_categories"] = categories[query.product_category]
+        #     filter["product_categories"] = query.product_category
         documents = vector_store.similarity_search_with_relevance_scores(
-            q, k=10, score_threshold=0.5, filter=filter)
+            query.english_query, k=10, score_threshold=0.5, filter=filter)
 
         def to_product(document: Document, score: float):
             ret = {}
